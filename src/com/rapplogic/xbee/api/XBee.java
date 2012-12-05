@@ -111,7 +111,7 @@ public class XBee implements IXBee {
 			
 			this.clearResponseQueue();
 		} catch (XBeeTimeoutException ex) {
-			throw new XBeeException("AT command timed-out while attempt to set/read in API mode.  The XBee radio must be in API mode (AP=2) to use with this library");
+			throw new XBeeException("AT command timed-out while attempt to set/read in API mode.  The XBee radio must be in API mode (AP=2) to use with this library", ex);
 		}		
 	}
 	
@@ -537,7 +537,10 @@ public class XBee implements IXBee {
 	 * @return
 	 */
 	public boolean isConnected() {
-		try {
+    try {
+      if (parser == null) {
+        return false;
+      }
 			if (parser.getXBeeConnection().getInputStream() != null && parser.getXBeeConnection().getOutputStream() != null) {
 				return true;
 			}
