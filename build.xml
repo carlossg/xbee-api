@@ -21,7 +21,7 @@ Subversion release copy command: svn copy -m "0.4 release" https://xbee-api.goog
 
 TODO provide bin, src, and examples distributions
  -->
-<project default="compile" name="XBee-API">
+<project default="compile" name="XBee-API" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
 	<property file="build.properties"/>
 	<property name="build.dir" value="build"/>
 	<property name="src.dir" value="src"/>
@@ -30,7 +30,12 @@ TODO provide bin, src, and examples distributions
 	<property name="javadoc.dir" value="docs/api"/>
 	<property name="release" value="0.9"/>
 
-   	<path id="compile-classpath">
+  <path id="maven-ant-tasks.classpath" path="lib/maven-ant-tasks-2.1.3.jar" />
+  <typedef resource="org/apache/maven/artifact/ant/antlib.xml"
+           uri="antlib:org.apache.maven.artifact.ant"
+           classpathref="maven-ant-tasks.classpath" />
+
+  <path id="compile-classpath">
 		<fileset dir="${lib.dir}">
 			<include name="**/*.jar"/>
 		</fileset>
@@ -54,11 +59,20 @@ TODO provide bin, src, and examples distributions
 			<include name="*/**"/>
 		</javac>
 	</target>
-	
-	<target name="dist" depends="compile,javadoc">
-		
-		<jar basedir="${build.dir}" destfile="${dist.dir}/xbee-api-${release}.jar"/>
-		
+
+  <target name="jar" depends="compile">
+    <jar basedir="${build.dir}" destfile="${dist.dir}/xbee-api-${release}.jar"/>
+  </target>
+
+  <target name="install" depends="jar">
+    <artifact:pom id="mypom" file="pom.xml" />
+    <artifact:install file="${dist.dir}/xbee-api-${release}.jar">
+      <pom refid="mypom"/>
+    </artifact:install>
+  </target>
+
+    <target name="dist" depends="jar,javadoc">
+
 		<!-- copy thirdparty libs -->
 		<copy todir="${dist.dir}/lib">
 			<fileset dir="${lib.dir}">
